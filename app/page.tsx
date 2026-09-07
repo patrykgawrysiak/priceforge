@@ -104,6 +104,27 @@ export default function Home() {
   const isXbox = platform === "xbox";
   const priceForgeLogo = isXbox ? xboxWordmark : playstationWordmark;
 
+  const testSaveGame = async () => {
+    console.log("TEST BUTTON CLICKED");
+
+    const response = await fetch("/api/games", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        microsoft_product_id: "TEST-123",
+        title: "Test Game",
+        platform: "Xbox",
+        image_url: null,
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log("Save game result:", data);
+  };
+
   const filteredGames =
     platform === "xbox" && search.trim()
       ? xboxGames.slice(0, 8)
@@ -114,8 +135,6 @@ export default function Home() {
               .includes(search.toLowerCase())
           )
           .slice(0, 8);
-
-
 
   useEffect(() => {
     if (platform !== "xbox" || !search.trim()) {
@@ -346,9 +365,7 @@ export default function Home() {
         const finalGames = limited
           .map((candidate: any) => {
             const detailed =
-              gamesById.get(
-                candidate.id
-              );
+              gamesById.get(candidate.id);
 
             if (!detailed) {
               return null;
@@ -357,18 +374,21 @@ export default function Home() {
             return {
               ...detailed,
 
-              // Preserve the candidate's
-              // catalogue information.
-              edition:
-                detailed.edition ??
-                candidate.edition ??
-                detailed.title,
+              // Use Microsoft's autosuggest title.
+              // This is the clean, user-facing name.
+              title: candidate.title,
+
+              // Keep the same title available as the
+              // display/edition name for now.
+              edition: candidate.title,
 
               searchScore:
                 candidate.score,
             };
           })
           .filter(Boolean);
+
+        setXboxGames(finalGames);
 
         setXboxGames(finalGames);
       } catch (error: any) {
@@ -413,6 +433,10 @@ export default function Home() {
           </a>
         </div>
       </header>
+
+                <button onClick={testSaveGame}>
+              Test Save Game
+            </button>
 
       {/* Hero */}
       <section className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pb-20 pt-10 text-center sm:px-8 sm:pb-24 sm:pt-16">
@@ -577,7 +601,9 @@ export default function Home() {
                       </p>
 
                       {game.edition &&
-                        game.edition !== game.title && (
+                        game.edition !== game.title &&
+                        game.edition.toLowerCase() !==
+                          game.title.toLowerCase().split(" ").pop() && (
                           <p className="mt-0.5 truncate text-xs text-zinc-500">
                             {game.edition}
                           </p>
