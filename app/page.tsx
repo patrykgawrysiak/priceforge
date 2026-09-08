@@ -104,27 +104,6 @@ export default function Home() {
   const isXbox = platform === "xbox";
   const priceForgeLogo = isXbox ? xboxWordmark : playstationWordmark;
 
-  const testSaveGame = async () => {
-    console.log("TEST BUTTON CLICKED");
-
-    const response = await fetch("/api/games", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        microsoft_product_id: "TEST-123",
-        title: "Test Game",
-        platform: "Xbox",
-        image_url: null,
-      }),
-    });
-
-    const data = await response.json();
-
-    console.log("Save game result:", data);
-  };
-
   const filteredGames =
     platform === "xbox" && search.trim()
       ? xboxGames.slice(0, 8)
@@ -433,10 +412,6 @@ export default function Home() {
           </a>
         </div>
       </header>
-
-                <button onClick={testSaveGame}>
-              Test Save Game
-            </button>
 
       {/* Hero */}
       <section className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pb-20 pt-10 text-center sm:px-8 sm:pb-24 sm:pt-16">
